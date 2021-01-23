@@ -1,3 +1,4 @@
 {
+    "typeCheckingMode": "off",
     "reportWildcardImportFromLibrary": "none"
 }
