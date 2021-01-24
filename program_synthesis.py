@@ -4,6 +4,14 @@ from program import Program
 import bit_vector_tests as BVT
 
 
+# s = Solver()
+# p = Program()
+# p.create_add_component()
+# p.create_add_component()
+# s.add(p.components[0].constraint())
+# s.add(p.components[1].constraint())
+# print(s)
+
 # print(BVT.check_test(BVT.P1, 0b1000, 0b1010))
 # print(BVT.eval_test(BVT.P1, 0b1010))
 # print(BVT.eval_test(BVT.P2, 0b11111))
