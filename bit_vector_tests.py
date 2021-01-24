@@ -1,5 +1,5 @@
 from z3 import *
-from program_synthesis import BV_LENGTH
+from constants import BV_LENGTH
 
 def check_test(test, output, input, input2=None):
     s = Solver()
