@@ -1,10 +1,11 @@
 from z3 import *
+from program_synthesis import BV_LENGTH
 
 def check_test(test, output, input, input2=None):
     s = Solver()
-    x = BitVecVal(input, 32)
+    x = BitVecVal(input, BV_LENGTH)
     if input2 is not None:
-        y = BitVecVal(input2, 32)
+        y = BitVecVal(input2, BV_LENGTH)
         s.add(test(x, y) == output)
     else:
         s.add(test(x) == output)
@@ -12,10 +13,10 @@ def check_test(test, output, input, input2=None):
 
 def eval_test(test, input, input2=None):
     s = Solver()
-    x = BitVecVal(input, 32)
-    output = BitVec('output', 32)
+    x = BitVecVal(input, BV_LENGTH)
+    output = BitVec('output', BV_LENGTH)
     if input2 is not None:
-        y = BitVecVal(input2, 32)
+        y = BitVecVal(input2, BV_LENGTH)
         s.add(test(x, y) == output)
     else:
         s.add(test(x) == output)

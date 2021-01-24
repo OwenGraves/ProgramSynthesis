@@ -1,6 +1,9 @@
 from z3 import *
 from component import Component
 import bit_vector_tests as BVT
+from program import Program
+
+BV_LENGTH = 32
 
 # print(BVT.check_test(BVT.P1, 0b1000, 0b1010))
 # print(BVT.eval_test(BVT.P1, 0b1010))

@@ -1,3 +1,4 @@
+from z3 import *
 import operator
 
 class Component:
