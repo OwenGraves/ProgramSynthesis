@@ -4,20 +4,36 @@ from collections import Counter
 from component import Component
 import itertools
 import operator
+import copy
 
 class Program:
-    def __init__(self, components=[]):
-        self.components = components
+    def __init__(self, num_prog_inputs=1, components=[]):
         self.variable_numbers = Counter()
+        self.prog_inputs = [self.fresh_I_variable() for _ in range(num_prog_inputs)]
+        self.components = copy.deepcopy(components)
+
+    def __str__(self): # TODO write __str__ for constraint
+        s = ''
+        for c in self.components:
+            s += str(c.constraint()) + '\n'
+        return s
+
+    def L_to_prog(self):
+        p = Program(len(self.prog_inputs), self.components)
+
+        return p
 
     def create_component(self, func, func_arity=2):
-        input_vars = [self.fresh_I_variable() for _ in range(func_arity)]
+        input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
         c = Component(input_vars, self.fresh_O_variable(), func)
         self.components.append(c)
         return c
 
     def create_add_component(self):
         return self.create_component(operator.add)
+
+    def create_increment_component(self):
+        return self.create_component(lambda x: x + 1, 1)
 
     def generate_encoding_constraints(self):
         P, R = [], []
@@ -28,12 +44,15 @@ class Program:
         for x in P + R:
             L[x] = self.fresh_l_variable()
         
+        # TODO encoding?
         encode, decode = dict(), dict()
         for i, var in enumerate(P):
             encode[var], decode[i] = i, var
         for i, var in enumerate(R): # should this represent assignment statements or output variables?
             encode[var], decode[i + len(P)] = i + len(P), var
-        M = len(P) + len(R) # len(P) = |I|, len(R) = N
+        
+        I_size = len(self.prog_inputs)
+        M = I_size + len(self.components)
         
         psi_cons = []
         for x, y in itertools.combinations(R, 2):
@@ -49,13 +68,10 @@ class Program:
             psi_wfp.append(0 <= L[x])
             psi_wfp.append(L[x] < M)
         for x in R:
-            psi_wfp.append(len(P) <= L[x])
+            psi_wfp.append(I_size <= L[x])
             psi_wfp.append(L[x] < M)
         psi_wfp += psi_cons + psi_acyc
 
-        print(decode[0])
-        print(decode[2])
-        # TODO figure out Lval2Prog encoding and if examples in prog_synth make sense
         return psi_wfp
 
     def fresh_variable(self, variable_character):
@@ -66,7 +82,10 @@ class Program:
     def fresh_l_variable(self):
         return self.fresh_variable('l')
     
-    def fresh_I_variable(self):
+    def fresh_i_variable(self): # for component inputs
+        return self.fresh_variable('i')
+
+    def fresh_I_variable(self): # for program inputs
         return self.fresh_variable('I')
 
     def fresh_O_variable(self):
