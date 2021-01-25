@@ -4,6 +4,14 @@ from program import Program
 import bit_vector_tests as BVT
 
 
+s = Solver()
+p = Program()
+p.create_add_component()
+p.create_add_component()
+p.create_add_component()
+p.create_add_component()
+print(p.generate_encoding_constraints())
+
 # s = Solver()
 # p = Program()
 # p.create_add_component()

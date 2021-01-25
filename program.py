@@ -19,19 +19,41 @@ class Program:
     def create_add_component(self):
         return self.create_component(operator.add)
 
-    def temp_name(self): # TODO refactor this method
-        N = len(self.components)
-        # should these be created as part of a component?
-        P, R, L = [], [], []
-        for _ in range(N):
-            P.append(self.fresh_I_variable())
-            R.append(self.fresh_O_variable())
-            L.append(self.fresh_l_variable())
-            L.append(self.fresh_l_variable())
+    def generate_encoding_constraints(self):
+        P, R = [], []
+        for c in self.components:
+            P.extend(c.inputs)
+            R.append(c.output)
+        L = dict()
+        for x in P + R:
+            L[x] = self.fresh_l_variable()
+        
+        encode, decode = dict(), dict()
+        for i, var in enumerate(P):
+            encode[var], decode[i] = i, var
+        for i, var in enumerate(R): # should this represent assignment statements or output variables?
+            encode[var], decode[i + len(P)] = i + len(P), var
+        M = len(P) + len(R) # len(P) = |I|, len(R) = N
+        
         psi_cons = []
         for x, y in itertools.combinations(R, 2):
-            psi_cons.append(x == y)
-        return
+            psi_cons.append(L[x] != L[y])
+
+        psi_acyc = []
+        for c in self.components:
+            for x in c.inputs:
+                psi_acyc.append(L[x] < L[c.output])
+
+        psi_wfp = []
+        for x in P:
+            psi_wfp.append(0 <= L[x])
+            psi_wfp.append(L[x] < M)
+        for x in R:
+            psi_wfp.append(len(P) <= L[x])
+            psi_wfp.append(L[x] < M)
+        psi_wfp += psi_cons + psi_acyc
+        
+        return psi_wfp
 
     def fresh_variable(self, variable_character):
         fresh_var = BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
