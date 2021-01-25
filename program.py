@@ -52,7 +52,10 @@ class Program:
             psi_wfp.append(len(P) <= L[x])
             psi_wfp.append(L[x] < M)
         psi_wfp += psi_cons + psi_acyc
-        
+
+        print(decode[0])
+        print(decode[2])
+        # TODO figure out Lval2Prog encoding and if examples in prog_synth make sense
         return psi_wfp
 
     def fresh_variable(self, variable_character):
