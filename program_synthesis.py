@@ -9,6 +9,7 @@ p.create_increment_component()
 p.create_add_component()
 q = p.generate_constrained_program()
 print(q)
+# Does Lval2Prog assign values and then rearrange the components?
 # TODO sort components by o_n
 # q.components[0], q.components[1] = q.components[1], q.components[0]
 # print(q)

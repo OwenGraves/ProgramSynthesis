@@ -12,11 +12,8 @@ class Program:
         self.prog_inputs = [self.fresh_I_variable() for _ in range(num_prog_inputs)]
         self.components = copy.deepcopy(components)
 
-    def __str__(self): # TODO write __str__ for Component
-        s = ''
-        for c in self.components:
-            s += str(c.constraint()) + '\n'
-        return s.rstrip()
+    def __str__(self):
+        return '\n'.join(str(c) for c in self.components)
 
     def create_component(self, func, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]

@@ -7,6 +7,9 @@ class Component:
         self.output = output
         self.func = func
 
+    def __str__(self):
+        return str(self.constraint())
+
     def constraint(self):
         return self.output == self.func(*self.inputs)
 
