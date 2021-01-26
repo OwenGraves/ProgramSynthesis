@@ -79,6 +79,9 @@ class Program:
             for i in range(len(c.inputs)):
                 c.inputs[i] = decode[int(str(l_values[L[c.inputs[i]]]))]
             c.output = decode[int(str(l_values[L[c.output]]))]
+        print(p)
+        print('After sorting p:')
+        p.components.sort()
 
         return p
 
