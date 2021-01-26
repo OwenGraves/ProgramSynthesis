@@ -12,16 +12,11 @@ class Program:
         self.prog_inputs = [self.fresh_I_variable() for _ in range(num_prog_inputs)]
         self.components = copy.deepcopy(components)
 
-    def __str__(self): # TODO write __str__ for constraint
+    def __str__(self): # TODO write __str__ for Component
         s = ''
         for c in self.components:
             s += str(c.constraint()) + '\n'
-        return s
-
-    def L_to_prog(self):
-        p = Program(len(self.prog_inputs), self.components)
-
-        return p
+        return s  
 
     def create_component(self, func, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
@@ -43,14 +38,6 @@ class Program:
         L = dict()
         for x in P + R:
             L[x] = self.fresh_l_variable()
-        
-        # TODO encoding?
-        encode, decode = dict(), dict()
-        for i, var in enumerate(P):
-            encode[var], decode[i] = i, var
-        for i, var in enumerate(R): # should this represent assignment statements or output variables?
-            encode[var], decode[i + len(P)] = i + len(P), var
-        
         I_size = len(self.prog_inputs)
         M = I_size + len(self.components)
         
@@ -72,11 +59,24 @@ class Program:
             psi_wfp.append(L[x] < M)
         psi_wfp += psi_cons + psi_acyc
 
-        return psi_wfp
+        s = Solver()
+        s.add(psi_wfp)
+        s.check()
+        l_values = s.model()
+
+        def decode():
+            pass
+
+        # Lval2Prog
+        p = Program(I_size, self.components)
+        for c in p.components:
+            pass
+
+        return p
 
     def fresh_variable(self, variable_character):
-        fresh_var = BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
         self.variable_numbers[variable_character] += 1
+        fresh_var = BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
         return fresh_var
 
     def fresh_l_variable(self):
