@@ -4,13 +4,14 @@ from program import Program
 import bit_vector_tests as BVT
 
 
-s = Solver()
 p = Program()
 p.create_increment_component()
 p.create_add_component()
-s.add(p.generate_encoding_constraints())
-s.check()
-print(s.model())
+q = p.generate_constrained_program()
+print(q)
+# TODO sort components by o_n
+# q.components[0], q.components[1] = q.components[1], q.components[0]
+# print(q)
 
 # s = Solver()
 # p = Program()

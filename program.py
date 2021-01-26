@@ -16,11 +16,11 @@ class Program:
         s = ''
         for c in self.components:
             s += str(c.constraint()) + '\n'
-        return s  
+        return s.rstrip()
 
     def create_component(self, func, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
-        c = Component(input_vars, self.fresh_O_variable(), func)
+        c = Component(input_vars, self.fresh_o_variable(), func)
         self.components.append(c)
         return c
 
@@ -30,7 +30,7 @@ class Program:
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)
 
-    def generate_encoding_constraints(self):
+    def generate_constrained_program(self):
         P, R = [], []
         for c in self.components:
             P.extend(c.inputs)
@@ -61,16 +61,27 @@ class Program:
 
         s = Solver()
         s.add(psi_wfp)
+        # for testing
+        s.add(BitVec('l4', BV_LENGTH) == 2)
+        s.add(BitVec('l1', BV_LENGTH) != 0)
+
         s.check()
         l_values = s.model()
+        print(self)
+        print(l_values)
 
-        def decode():
-            pass
+        decode = dict() # maps integer l value to variable
+        for i in range(I_size):
+            decode[i] = self.prog_inputs[i]
+        for i in range(I_size, M):
+            decode[i] = R[i - I_size]
 
         # Lval2Prog
         p = Program(I_size, self.components)
         for c in p.components:
-            pass
+            for i in range(len(c.inputs)):
+                c.inputs[i] = decode[int(str(l_values[L[c.inputs[i]]]))]
+            c.output = decode[int(str(l_values[L[c.output]]))]
 
         return p
 
@@ -88,5 +99,5 @@ class Program:
     def fresh_I_variable(self): # for program inputs
         return self.fresh_variable('I')
 
-    def fresh_O_variable(self):
-        return self.fresh_variable('O')
+    def fresh_o_variable(self):
+        return self.fresh_variable('o')
