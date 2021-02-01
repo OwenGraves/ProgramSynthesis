@@ -1,1 +1,1 @@
-BV_LENGTH = 32
+BV_LENGTH = 5

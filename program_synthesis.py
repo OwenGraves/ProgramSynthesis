@@ -6,10 +6,10 @@ import bit_vector_tests as BVT
 
 p = Program()
 p.create_increment_component()
+p.create_increment_component()
 p.create_add_component()
 q = p.generate_constrained_program()
 print(q)
-# Does Lval2Prog assign values and then rearrange the components or rearrange components first?
 
 # s = Solver()
 # p = Program()
