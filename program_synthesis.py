@@ -23,10 +23,10 @@ p = Program()
 p.create_increment_component()
 p.create_increment_component()
 p.create_add_component()
-q = p.generate_constrained_program([([2], 4), ([3], 8)])
-print(q)
-
-
+# q = p.generate_constraints([([2], 4)])
+q = p.generate_constraints([2], 4)
+z = p.l_values_to_prog(p.solve_constraints(q))
+print(z)
 
 # print(BVT.check_test(BVT.P1, 0b1000, 0b1010))
 # print(BVT.eval_test(BVT.P1, 0b1010))

@@ -1,5 +1,6 @@
 from z3 import *
 import operator
+import re
 
 class Component:
     def __init__(self, inputs, output, func):
@@ -12,7 +13,7 @@ class Component:
 
     def __lt__(self, other): # orders based on output variable number, somewhat hacky
         def extract_int_value(c):
-            return int(str(c.output)[1:])
+            return int(re.split(r'\D+', str(c.output))[-1])
         return extract_int_value(self) < extract_int_value(other)
 
     def constraint(self):
