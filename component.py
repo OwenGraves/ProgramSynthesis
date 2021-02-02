@@ -19,7 +19,3 @@ class Component:
 
     def constraint(self):
         return self.output == self.func(*self.inputs)
-
-    @classmethod
-    def add(cls, inputs, output):
-        return cls(inputs, output, operator.add)

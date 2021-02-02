@@ -14,12 +14,14 @@ class Program:
         self.components = []
         for c in components:
             self.create_component(c.func, c.func_arity)
+        self.update_values_based_on_components()
 
     def update_values_based_on_components(self, distinctl=False):
         self.P, self.R = [], []
         for c in self.components:
             self.P.extend(c.inputs)
             self.R.append(c.output)
+        self.reset_l_variables()
         self.L = dict()
         for x in self.P + self.R:
             if distinctl:
@@ -44,6 +46,12 @@ class Program:
     def create_and_component(self):
         return self.create_component(operator.and_)
 
+    def create_xor_component(self):
+        return self.create_component(operator.xor)
+
+    def create_bitshiftright_component(self, shift_amount):
+        return self.create_component(lambda x: x >> shift_amount, 1)
+
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)
 
@@ -51,7 +59,7 @@ class Program:
         return self.create_component(lambda x: x - 1, 1)
 
     def distinct_constraint(self, list_inputs_outputs):
-        dist_input = [self.fresh_d_variable()]
+        dist_input = [self.fresh_d_variable() for _ in range(len(self.prog_inputs))]
         dist_output = BitVec('dist_o1', BV_LENGTH)
         dist_output2 = BitVec('dist_o2', BV_LENGTH)
 
@@ -64,7 +72,8 @@ class Program:
 
         name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
-        constraints += p.generate_constraints(dist_input, dist_output2, distinctl=True)
+        p.update_values_based_on_components(True)
+        constraints += p.generate_constraints(dist_input, dist_output2)
         return constraints
 
     def behave_constraints(self, list_inputs_outputs):
@@ -87,9 +96,9 @@ class Program:
         l_values = s.model()
         return l_values
 
-    def generate_constraints(self, inputs, output, distinctl=False):
-        self.update_values_based_on_components(distinctl)
-        
+    def generate_constraints(self, inputs, output):
+        self.update_values_based_on_components()
+
         # syntactic well-formedness constraints
         psi_cons = []
         for x, y in itertools.combinations(self.R, 2):
@@ -146,6 +155,9 @@ class Program:
     def fresh_variable_no_prefix(self, variable_character):
         self.variable_numbers[variable_character] += 1
         return BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
+
+    def reset_l_variables(self):
+        self.variable_numbers['l'] = 0
 
     def fresh_l_variable_no_prefix(self): # for l values
         return self.fresh_variable_no_prefix('l')
