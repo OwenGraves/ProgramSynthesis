@@ -15,14 +15,17 @@ class Program:
         for c in components:
             self.create_component(c.func, c.func_arity)
 
-    def update_values_based_on_components(self):
+    def update_values_based_on_components(self, distinctl=False):
         self.P, self.R = [], []
         for c in self.components:
             self.P.extend(c.inputs)
             self.R.append(c.output)
         self.L = dict()
         for x in self.P + self.R:
-            self.L[x] = self.fresh_l_variable()
+            if distinctl:
+                self.L[x] = self.fresh_l_variable()
+            else:
+                self.L[x] = self.fresh_l_variable_no_prefix()
         self.I_size = len(self.prog_inputs)
         self.M = self.I_size + len(self.components)
 
@@ -47,6 +50,23 @@ class Program:
     def create_decrement_component(self):
         return self.create_component(lambda x: x - 1, 1)
 
+    def distinct_constraint(self, list_inputs_outputs):
+        dist_input = [self.fresh_d_variable()]
+        dist_output = BitVec('dist_o1', BV_LENGTH)
+        dist_output2 = BitVec('dist_o2', BV_LENGTH)
+
+        constraints = []
+        constraints.append(dist_output != dist_output2)
+        constraints += self.behave_constraints(list_inputs_outputs)
+
+        p = Program(self.prog_name, self.I_size, self.components)
+        constraints += p.generate_constraints(dist_input, dist_output)
+
+        name = f'{self.prog_name}d_'
+        p = Program(name, self.I_size, self.components)
+        constraints += p.generate_constraints(dist_input, dist_output2, distinctl=True)
+        return constraints
+
     def behave_constraints(self, list_inputs_outputs):
         constraints = []
         self.update_values_based_on_components()
@@ -67,8 +87,8 @@ class Program:
         l_values = s.model()
         return l_values
 
-    def generate_constraints(self, inputs, output):
-        self.update_values_based_on_components()
+    def generate_constraints(self, inputs, output, distinctl=False):
+        self.update_values_based_on_components(distinctl)
         
         # syntactic well-formedness constraints
         psi_cons = []
@@ -127,8 +147,11 @@ class Program:
         self.variable_numbers[variable_character] += 1
         return BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
 
-    def fresh_l_variable(self):
+    def fresh_l_variable_no_prefix(self): # for l values
         return self.fresh_variable_no_prefix('l')
+
+    def fresh_l_variable(self): # for distinct l values
+        return self.fresh_variable('l')
     
     def fresh_i_variable(self): # for component inputs
         return self.fresh_variable('i')
@@ -136,8 +159,11 @@ class Program:
     def fresh_I_variable(self): # for program inputs
         return self.fresh_variable('I')
 
-    def fresh_o_variable(self):
+    def fresh_o_variable(self): # for component outputs
         return self.fresh_variable('o')
 
-    def fresh_O_variable(self):
+    def fresh_O_variable(self): # for program outputs
         return self.fresh_variable('O')
+
+    def fresh_d_variable(self): # for distinguishing constraints
+        return self.fresh_variable_no_prefix('d')
