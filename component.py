@@ -3,10 +3,11 @@ import operator
 import re
 
 class Component:
-    def __init__(self, inputs, output, func):
+    def __init__(self, inputs, output, func, func_arity):
         self.inputs = inputs
         self.output = output
         self.func = func
+        self.func_arity = func_arity
 
     def __str__(self):
         return str(self.constraint())

@@ -4,15 +4,16 @@ from collections import Counter
 from component import Component
 import itertools
 import operator
-import copy
 
 class Program:
     def __init__(self, prog_name='', num_prog_inputs=1, components=[]):
         self.prog_name = prog_name
         self.variable_numbers = Counter()
         self.prog_inputs = [self.fresh_I_variable() for _ in range(num_prog_inputs)]
-        self.prog_output = BitVec('result', BV_LENGTH)
-        self.components = copy.deepcopy(components)
+        self.prog_output = self.fresh_O_variable()
+        self.components = []
+        for c in components:
+            self.create_component(c.func, c.func_arity)
 
     def update_values_based_on_components(self):
         self.P, self.R = [], []
@@ -30,21 +31,38 @@ class Program:
 
     def create_component(self, func, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
-        c = Component(input_vars, self.fresh_o_variable(), func)
+        c = Component(input_vars, self.fresh_o_variable(), func, func_arity)
         self.components.append(c)
         return c
 
     def create_add_component(self):
         return self.create_component(operator.add)
 
+    def create_and_component(self):
+        return self.create_component(operator.and_)
+
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)
+
+    def create_decrement_component(self):
+        return self.create_component(lambda x: x - 1, 1)
+
+    def behave_constraints(self, list_inputs_outputs):
+        constraints = []
+        self.update_values_based_on_components()
+        for j, (inputs, output) in enumerate(list_inputs_outputs):
+            name = f'{self.prog_name}{j}_'
+            p = Program(name, self.I_size, self.components)
+            constraints += p.generate_constraints(inputs, output)
+        return constraints
 
     def solve_constraints(self, constraints):
         s = Solver()
         s.add(constraints)
         check = s.check()
         if check != sat:
+            print('could not solve constraints')
+            print(constraints)
             return False
         l_values = s.model()
         return l_values
@@ -110,7 +128,7 @@ class Program:
         return BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
 
     def fresh_l_variable(self):
-        return self.fresh_variable('l')
+        return self.fresh_variable_no_prefix('l')
     
     def fresh_i_variable(self): # for component inputs
         return self.fresh_variable('i')
@@ -120,3 +138,6 @@ class Program:
 
     def fresh_o_variable(self):
         return self.fresh_variable('o')
+
+    def fresh_O_variable(self):
+        return self.fresh_variable('O')
