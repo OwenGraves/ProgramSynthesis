@@ -4,12 +4,20 @@ from program import Program
 import bit_vector_tests as BVT
 
 
-p = Program()
-p.create_increment_component()
-p.create_increment_component()
-p.create_add_component()
-q = p.generate_constrained_program_1IO(2, 4)
-print(q)
+# p = Program()
+# p.create_increment_component()
+# p.create_increment_component()
+# p.create_add_component()
+# q = p.generate_constrained_program_1IO(2, 4)
+# print(q)
+
+# p = Program(2)
+# p.create_increment_component()
+# p.create_increment_component()
+# p.create_add_component()
+# p.create_add_component()
+# q = p.generate_constrained_program_1IO([3,4], 13)
+# print(q)
 
 p = Program()
 p.create_increment_component()

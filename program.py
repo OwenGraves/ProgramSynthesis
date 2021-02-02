@@ -68,29 +68,33 @@ class Program:
         psi_wfp += psi_cons + psi_acyc
 
         # semantic constraints
-        psi_conn = []
-        for i, input in enumerate(self.prog_inputs):
-            L[input] = i
-        L[self.prog_output] = M - 1
-        for x, y in itertools.combinations(P + R + self.prog_inputs + [self.prog_output], 2):
-            psi_conn.append(Implies(L[x] == L[y], x == y))
         phi_lib = []
         for c in self.components:
             phi_lib.append(c.constraint())
+        psi_conn = []
+        pinputs = []
+        poutputs = []
+        for j in range(len(list_inputs_outputs)):
+            pinputs.append([self.append_number_variable(x, j) for x in self.prog_inputs])
+            poutputs.append(self.append_number_variable(self.prog_output, j))
+            for i, input in enumerate(pinputs[j]):
+                L[input] = i
+            L[poutputs[j]] = M - 1
+            for x, y in itertools.combinations(P + R + pinputs[j] + [poutputs[j]], 2):
+                psi_conn.append(Implies(L[x] == L[y], x == y))
 
         s = Solver()
         s.add(psi_wfp)
         s.add(psi_conn)
         s.add(phi_lib)
         for j, (inputs, output) in enumerate(list_inputs_outputs):
-            s.push()
-            s.add(output == self.prog_output)
-            s.add([inputs[i] == self.prog_inputs[i] for i in range(min(len(inputs), len(self.prog_inputs)))])
-            check = s.check()
-            if check != sat:
-                return False
-            if j != len(list_inputs_outputs) - 1:
-                s.pop()
+            s.add(output == poutputs[j])
+            assert len(inputs) == len(pinputs[j])
+            s.add([inputs[i] == pinputs[j][i] for i in range(len(inputs))])
+        print(s)
+        check = s.check() 
+        if check != sat:
+            return False
         l_values = s.model()
 
         # Lval2Prog
@@ -103,10 +107,13 @@ class Program:
 
         return p
 
+    @staticmethod
+    def append_number_variable(variable, number):
+        return BitVec(f'{str(variable)}_{number}', BV_LENGTH)
+
     def fresh_variable(self, variable_character):
         self.variable_numbers[variable_character] += 1
-        fresh_var = BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
-        return fresh_var
+        return BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
 
     def fresh_l_variable(self):
         return self.fresh_variable('l')
@@ -119,6 +126,3 @@ class Program:
 
     def fresh_o_variable(self):
         return self.fresh_variable('o')
-
-    def fresh_O_variable(self):
-        return self.fresh_variable('O')
