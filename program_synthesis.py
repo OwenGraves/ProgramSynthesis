@@ -3,36 +3,56 @@ from component import Component
 from program import Program
 import bit_vector_tests as BVT
 
+def iterative_synthesis(program: Program, oracle):
+    a0 = [0] * len(program.prog_inputs)
+    E = [(a0, oracle(*a0))]
+    while True:
+        L = program.solve_constraints(program.behave_constraints(E))
+        print(L)
+        print(program.l_values_to_prog(L))
+        if not L:
+            return 'Components insufficient'
+        a = program.solve_constraints(program.distinct_constraint(E))
+        if not a:
+            return program.l_values_to_prog(a) # TODO validation oracle check
+        a = program.get_distinct_inputs(a)
+        E.append((a, oracle(*a)))
+        print(E)
 
-p = Program(num_prog_inputs=2)
+p = Program(num_prog_inputs=1)
+p.create_and_component()
 p.create_increment_component()
-p.create_add_component()
-const = [([1, 2], 3)]
-q = p.distinct_constraint(const)
-w = p.solve_constraints(q)
-print(w)
-z = p.l_values_to_prog(w)
+print(iterative_synthesis(p, BVT.P2))
+
+# p = Program(num_prog_inputs=2)
+# p.create_increment_component()
+# p.create_add_component()
+# const = [([1, 2], 3)]
+# q = p.distinct_constraint(const)
+# w = p.solve_constraints(q)
+# print(w)
+# z = p.l_values_to_prog(w)
+# # print(z)
+
+# p = Program(num_prog_inputs=2)
+# p.create_increment_component()
+# p.create_add_component()
+# const = [([1, 2], 3), ([0, 197], 198)]
+# q = p.behave_constraints(const)
+# w = p.solve_constraints(q)
+# # print(w)
+# z = p.l_values_to_prog(w)
 # print(z)
 
-p = Program(num_prog_inputs=2)
-p.create_increment_component()
-p.create_add_component()
-const = [([1, 2], 3), ([0, 197], 198)]
-q = p.behave_constraints(const)
-w = p.solve_constraints(q)
-# print(w)
-z = p.l_values_to_prog(w)
-print(z)
-
-p = Program(num_prog_inputs=2)
-p.create_increment_component()
-p.create_add_component()
-const = [([1, 2], 3), ([0, 197], 1)]
-q = p.behave_constraints(const)
-w = p.solve_constraints(q)
-# print(w)
-z = p.l_values_to_prog(w)
-print(z)
+# p = Program(num_prog_inputs=2)
+# p.create_increment_component()
+# p.create_add_component()
+# const = [([1, 2], 3), ([0, 197], 1)]
+# q = p.behave_constraints(const)
+# w = p.solve_constraints(q)
+# # print(w)
+# z = p.l_values_to_prog(w)
+# print(z)
 
 # p = Program(num_prog_inputs=2)
 # p.create_and_component()

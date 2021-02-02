@@ -59,6 +59,7 @@ class Program:
         return self.create_component(lambda x: x - 1, 1)
 
     def distinct_constraint(self, list_inputs_outputs):
+        self.reset_d_variables()
         dist_input = [self.fresh_d_variable() for _ in range(len(self.prog_inputs))]
         dist_output = BitVec('doutput1', BV_LENGTH)
         dist_output2 = BitVec('doutput2', BV_LENGTH)
@@ -73,6 +74,13 @@ class Program:
         constraints += p.behave_constraints(list_inputs_outputs)
         constraints += p.generate_constraints(dist_input, dist_output2, distinctl=True)
         return constraints
+
+    def get_distinct_inputs(self, values):
+        dinputs = []
+        for i in range(1, len(self.prog_inputs) + 1):
+            dinput = BitVec(f'dinput{i}', BV_LENGTH)
+            dinputs.append(int(str(values[dinput])))
+        return dinputs
 
     def behave_constraints(self, list_inputs_outputs):
         constraints = []
@@ -177,3 +185,6 @@ class Program:
 
     def fresh_d_variable(self): # for distinguishing constraints
         return self.fresh_variable_no_prefix('dinput')
+
+    def reset_d_variables(self):
+        self.variable_numbers['dinput'] = 0
