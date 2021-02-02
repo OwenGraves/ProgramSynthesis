@@ -25,7 +25,7 @@ class Program:
         self.L = dict()
         for x in self.P + self.R:
             if distinctl:
-                self.L[x] = self.fresh_l_variable()
+                self.L[x] = self.fresh_d_l_variable_no_prefix()
             else:
                 self.L[x] = self.fresh_l_variable_no_prefix()
         self.I_size = len(self.prog_inputs)
@@ -59,20 +59,18 @@ class Program:
         return self.create_component(lambda x: x - 1, 1)
 
     def distinct_constraint(self, list_inputs_outputs):
-        self.reset_d_variables()
-        dist_input = [self.fresh_d_variable() for _ in range(len(self.prog_inputs))]
+        self.reset_dinput_variables()
+        dist_input = [self.fresh_dinput_variable() for _ in range(len(self.prog_inputs))]
         dist_output = BitVec('doutput1', BV_LENGTH)
         dist_output2 = BitVec('doutput2', BV_LENGTH)
 
         constraints = []
         constraints.append(dist_output != dist_output2)
-        constraints += self.behave_constraints(list_inputs_outputs)
-        constraints += self.generate_constraints(dist_input, dist_output)
+        constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)])
 
         name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
-        constraints += p.behave_constraints(list_inputs_outputs)
-        constraints += p.generate_constraints(dist_input, dist_output2, distinctl=True)
+        constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], distinctl=True)
         return constraints
 
     def get_distinct_inputs(self, values):
@@ -82,13 +80,13 @@ class Program:
             dinputs.append(int(str(values[dinput])))
         return dinputs
 
-    def behave_constraints(self, list_inputs_outputs):
+    def behave_constraints(self, list_inputs_outputs, distinctl=False):
         constraints = []
         self.update_values_based_on_components()
         for j, (inputs, output) in enumerate(list_inputs_outputs):
             name = f'{self.prog_name}{j}_'
             p = Program(name, self.I_size, self.components)
-            constraints += p.generate_constraints(inputs, output)
+            constraints += p.generate_constraints(inputs, output, distinctl)
         return constraints
 
     def solve_constraints(self, constraints):
@@ -96,8 +94,8 @@ class Program:
         s.add(constraints)
         check = s.check()
         if check != sat:
-            print('could not solve constraints')
-            print(constraints)
+            # print('could not solve constraints')
+            # print(constraints)
             return False
         l_values = s.model()
         return l_values
@@ -168,8 +166,8 @@ class Program:
     def fresh_l_variable_no_prefix(self): # for l values
         return self.fresh_variable_no_prefix('l')
 
-    def fresh_l_variable(self): # for distinct l values
-        return self.fresh_variable('l')
+    def fresh_d_l_variable_no_prefix(self): # for distinct l values
+        return self.fresh_variable_no_prefix('d_l')
     
     def fresh_i_variable(self): # for component inputs
         return self.fresh_variable('i')
@@ -183,8 +181,8 @@ class Program:
     def fresh_O_variable(self): # for program outputs
         return self.fresh_variable('O')
 
-    def fresh_d_variable(self): # for distinguishing constraints
+    def fresh_dinput_variable(self): # for distinguishing constraints
         return self.fresh_variable_no_prefix('dinput')
 
-    def reset_d_variables(self):
+    def reset_dinput_variables(self):
         self.variable_numbers['dinput'] = 0

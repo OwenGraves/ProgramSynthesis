@@ -1,5 +1,4 @@
 from z3 import *
-import operator
 import re
 
 class Component:
