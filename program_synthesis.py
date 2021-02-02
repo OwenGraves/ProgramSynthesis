@@ -8,10 +8,15 @@ p = Program()
 p.create_increment_component()
 p.create_increment_component()
 p.create_add_component()
-q = p.generate_constrained_program(4, 10)
+q = p.generate_constrained_program_1IO(2, 4)
 print(q)
 
-
+p = Program()
+p.create_increment_component()
+p.create_increment_component()
+p.create_add_component()
+q = p.generate_constrained_program([([2], 4), ([3], 8)])
+print(q)
 
 
 

@@ -28,9 +28,12 @@ class Program:
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)
 
-    def generate_constrained_program(self, inputs, output):
+    def generate_constrained_program_1IO(self, inputs, output):
         if not isinstance(inputs, list):
             inputs = [inputs]
+        return self.generate_constrained_program([(inputs, output)])
+
+    def generate_constrained_program(self, list_inputs_outputs):
         P, R = [], []
         for c in self.components:
             P.extend(c.inputs)
@@ -79,11 +82,15 @@ class Program:
         s.add(psi_wfp)
         s.add(psi_conn)
         s.add(phi_lib)
-        s.add(output == self.prog_output)
-        s.add([inputs[i] == self.prog_inputs[i] for i in range(min(len(inputs), len(self.prog_inputs)))])
-        check = s.check()
-        if check != sat:
-            return False
+        for j, (inputs, output) in enumerate(list_inputs_outputs):
+            s.push()
+            s.add(output == self.prog_output)
+            s.add([inputs[i] == self.prog_inputs[i] for i in range(min(len(inputs), len(self.prog_inputs)))])
+            check = s.check()
+            if check != sat:
+                return False
+            if j != len(list_inputs_outputs) - 1:
+                s.pop()
         l_values = s.model()
 
         # Lval2Prog
