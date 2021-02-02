@@ -60,20 +60,18 @@ class Program:
 
     def distinct_constraint(self, list_inputs_outputs):
         dist_input = [self.fresh_d_variable() for _ in range(len(self.prog_inputs))]
-        dist_output = BitVec('dist_o1', BV_LENGTH)
-        dist_output2 = BitVec('dist_o2', BV_LENGTH)
+        dist_output = BitVec('doutput1', BV_LENGTH)
+        dist_output2 = BitVec('doutput2', BV_LENGTH)
 
         constraints = []
         constraints.append(dist_output != dist_output2)
         constraints += self.behave_constraints(list_inputs_outputs)
-
-        p = Program(self.prog_name, self.I_size, self.components)
-        constraints += p.generate_constraints(dist_input, dist_output)
+        constraints += self.generate_constraints(dist_input, dist_output)
 
         name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
-        p.update_values_based_on_components(True)
-        constraints += p.generate_constraints(dist_input, dist_output2)
+        constraints += p.behave_constraints(list_inputs_outputs)
+        constraints += p.generate_constraints(dist_input, dist_output2, distinctl=True)
         return constraints
 
     def behave_constraints(self, list_inputs_outputs):
@@ -96,8 +94,8 @@ class Program:
         l_values = s.model()
         return l_values
 
-    def generate_constraints(self, inputs, output):
-        self.update_values_based_on_components()
+    def generate_constraints(self, inputs, output, distinctl=False):
+        self.update_values_based_on_components(distinctl)
 
         # syntactic well-formedness constraints
         psi_cons = []
@@ -178,4 +176,4 @@ class Program:
         return self.fresh_variable('O')
 
     def fresh_d_variable(self): # for distinguishing constraints
-        return self.fresh_variable_no_prefix('d')
+        return self.fresh_variable_no_prefix('dinput')
