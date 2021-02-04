@@ -12,7 +12,7 @@ class Program:
         self.variable_numbers = Counter()
         self.prog_inputs = [self.fresh_I_variable() for _ in range(num_prog_inputs)]
         self.prog_output = self.fresh_O_variable()
-        self.components = []
+        self.components: list[Component] = []
         for c in components:
             self.create_component(c.func, c.func_arity)
         self.update_values_based_on_components()
@@ -154,6 +154,23 @@ class Program:
             c.output = decode[int(str(l_values[self.L[c.output]]))]
         p.components.sort()
         return p
+
+    def cull_unused_components(self):
+        if len(self.components) == 0:
+            return
+        i = len(self.components) - 1
+        used_o_vars = set()
+        used_o_vars.add(self.components[i].output)
+        while 0 <= i < len(self.components):
+            c = self.components[i]
+            if c.output in used_o_vars:
+                used_o_vars.update(c.inputs)
+                i -= 1
+            else:
+                del self.components[i]
+
+        # TODO renumber outputs
+        return self
 
     def fresh_variable(self, variable_character):
         self.variable_numbers[variable_character] += 1
