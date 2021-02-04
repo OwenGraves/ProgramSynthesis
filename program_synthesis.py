@@ -1,5 +1,4 @@
 from z3 import *
-from component import Component
 from program import Program
 import bit_vector_tests as BVT
 from timeit import default_timer as timer

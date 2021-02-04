@@ -159,6 +159,8 @@ class Program:
     def cull_unused_components(self):
         if len(self.components) == 0:
             return
+
+        # delete unused components
         i = len(self.components) - 1
         used_o_vars = set()
         used_o_vars.add(self.components[i].output)
@@ -170,7 +172,17 @@ class Program:
             else:
                 del self.components[i]
 
-        # TODO renumber outputs
+        # renumber remaining outputs
+        self.reset_o_variables()
+        output_remapping = dict()
+        for c in self.components:
+            output_remapping[c.output] = self.fresh_o_variable()
+        for c in self.components:
+            if c.output in output_remapping:
+                c.output = output_remapping[c.output]
+            for i in range(len(c.inputs)):
+                if c.inputs[i] in output_remapping:
+                    c.inputs[i] = output_remapping[c.inputs[i]]
         return self
 
     def fresh_variable(self, variable_character):
@@ -181,11 +193,11 @@ class Program:
         self.variable_numbers[variable_character] += 1
         return BitVec(f'{variable_character}{self.variable_numbers[variable_character]}', BV_LENGTH)
 
-    def reset_l_variables(self):
-        self.variable_numbers['l'] = 0
-
     def fresh_l_variable_no_prefix(self): # for l values
         return self.fresh_variable_no_prefix('l')
+
+    def reset_l_variables(self):
+        self.variable_numbers['l'] = 0
 
     def fresh_d_l_variable_no_prefix(self): # for distinct l values
         return self.fresh_variable_no_prefix('d_l')
@@ -198,6 +210,9 @@ class Program:
 
     def fresh_o_variable(self): # for component outputs
         return self.fresh_variable('o')
+
+    def reset_o_variables(self):
+        self.variable_numbers['o'] = 0
 
     def fresh_O_variable(self): # for program outputs
         return self.fresh_variable('O')
