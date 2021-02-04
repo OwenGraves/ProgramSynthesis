@@ -2,6 +2,7 @@ from z3 import *
 from constants import BV_LENGTH
 from collections import Counter
 from component import Component
+from bit_vector_tests import bv
 import itertools
 import operator
 
@@ -50,7 +51,9 @@ class Program:
         return self.create_component(operator.xor)
 
     def create_bitshiftright_component(self, shift_amount):
-        return self.create_component(lambda x: x >> shift_amount, 1)
+        if isinstance(shift_amount, int):
+            shift_amount = bv(shift_amount)
+        return self.create_component(lambda x: LShR(x, shift_amount), 1)
 
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)

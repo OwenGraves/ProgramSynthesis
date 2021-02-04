@@ -1,27 +1,18 @@
 from z3 import *
-from constants import BV_LENGTH
+from constants import BV_LENGTH, bv
 
-def check_test(test, output, input, input2=None):
+def check_test(test, input, output):
+    if not isinstance(input, list):
+        input = [input]
     s = Solver()
-    x = BitVecVal(input, BV_LENGTH)
-    if input2 is not None:
-        y = BitVecVal(input2, BV_LENGTH)
-        s.add(test(x, y) == output)
-    else:
-        s.add(test(x) == output)
-    return s.check()
-
-def eval_test(test, input, input2=None):
-    s = Solver()
-    x = BitVecVal(input, BV_LENGTH)
-    output = BitVec('output', BV_LENGTH)
-    if input2 is not None:
-        y = BitVecVal(input2, BV_LENGTH)
-        s.add(test(x, y) == output)
-    else:
-        s.add(test(x) == output)
+    bv_inputs = [BitVecVal(i, BV_LENGTH) for i in input]
+    s.add(test(*bv_inputs) == output)
     s.check()
     return s.model()[output]
+
+def eval_test(test, input):
+    output = BitVec('output', BV_LENGTH)
+    return check_test(test, input, output)
 
 def P1(x):
     """Turn-off rightmost 1 bit."""
@@ -53,6 +44,6 @@ def P15(x, y):
     """Floor of average of two integers without overflowing."""
     o1 = x & y
     o2 = x ^ y
-    o3 = o2 >> 1
+    o3 = LShR(o2, bv(1))
     res = o1 + o3
     return res
