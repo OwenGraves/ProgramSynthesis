@@ -44,6 +44,6 @@ def P15(x, y):
     """Floor of average of two integers without overflowing."""
     o1 = x & y
     o2 = x ^ y
-    o3 = LShR(o2, bv(1))
+    o3 = simplify(LShR(o2, bv(1))).as_long()
     res = o1 + o3
     return res
