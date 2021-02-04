@@ -7,12 +7,16 @@ def check_test(test, input, output):
     s = Solver()
     bv_inputs = [BitVecVal(i, BV_LENGTH) for i in input]
     s.add(test(*bv_inputs) == output)
-    s.check()
-    return s.model()[output]
+    return s.check() # s.model()[output]
 
 def eval_test(test, input):
     output = BitVec('output', BV_LENGTH)
     return check_test(test, input, output)
+
+def Psimple(x):
+    """Increment."""
+    res = x + 1
+    return res
 
 def P1(x):
     """Turn-off rightmost 1 bit."""
