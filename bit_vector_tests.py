@@ -19,6 +19,12 @@ def bitshift(x, y):
 def ule(x, y):
     return simplify(If(ULE(bv(x), bv(y)), 1, 0)).as_long()
 
+def ult(x, y):
+    return simplify(If(ULT(bv(x), bv(y)), 1, 0)).as_long()
+
+def bvredor(x):
+    return simplify(BVRedOr(bv(x))).as_long()
+
 def Psimple(x):
     """Increment."""
     res = x + 1
@@ -88,10 +94,122 @@ def P10(x, y):
     res = ule(o2, o1)
     return res
 
+def P11(x, y):
+    """Test if nlz(x) < nlz(y)."""
+    o1 = ~y
+    o2 = x & o1
+    res = ult(y, o2)
+    return res
+
+def P12(x, y):
+    """Test if nlz(x) <= nlz(y)."""
+    o1 = ~y
+    o2 = x & o1
+    res = ule(o2, y)
+    return res
+
+def P13(x):
+    """Sign function."""
+    o1 = bitshift(x, BV_LENGTH - 1)
+    o2 = -x
+    o3 = bitshift(o2, BV_LENGTH - 1)
+    res = o1 | o3
+    return res
+
+def P14(x, k):
+    """Round up x to a multiple of kth power of 2."""
+    o1 = -1 << k
+    o2 = o1 + 1
+    o3 = x - o2
+    res = o3 & o1
+    return res
+
 def P15(x, y):
     """Floor of average of two integers without overflowing."""
     o1 = x & y
     o2 = x ^ y
     o3 = bitshift(o2, 1)
     res = o1 + o3
+    return res
+
+def P16(x, y):
+    """Compute max of two integers."""
+    o1 = x ^ y
+    o2 = ule(y, x)
+    o3 = -o2
+    o4 = o1 & o3
+    res = o4 ^ y
+    return res
+
+def P17(x, y):
+    """Compute min of two integers."""
+    o1 = x ^ y
+    o2 = ule(x, y)
+    o3 = -o2
+    o4 = o1 & o3
+    res = o4 ^ y
+    return res
+
+def P18(x, y):
+    """Ceil of average of two integers without overflowing."""
+    o1 = x | y
+    o2 = x ^ y
+    o3 = bitshift(o2, 1)
+    res = o1 - o3
+    return res
+
+def P19(x):
+    """Turn off the rightmost contiguous string of 1 bits."""
+    o1 = x - 1
+    o2 = x | o1
+    o3 = o2 + 1
+    res = o3 & x
+    return res
+
+def P20(x):
+    """Determine whether an integer is a power of 2.
+
+    Equivalent to:
+
+    def ispower2(x):
+        c = str(bin(x)).count('1')
+        if c == 1:
+            return 0
+        return 1
+    """
+    o1 = x - 1
+    o2 = bitshift(o1, BV_LENGTH - 1)
+    o3 = o1 & x
+    o4 = bvredor(o3)
+    res = o2 | o4
+    return res
+
+def P21(x):
+    """Next higher unsigned number with same number of 1 bits.
+    
+    Note: Can't use 0 because of the division
+    """
+    o1 = -x
+    o2 = x & o1
+    o3 = x + o2
+    o4 = x ^ o3
+    o5 = o4 // o2
+    o6 = bitshift(o5, 2)
+    res = o6 | o3
+    return res
+
+def P22(x):
+    """Round up to the next highest power of 2. (32 bit)."""
+    o1 = x - 1
+    o2 = bitshift(o1, 1)
+    o3 = o1 | o2
+    o4 = bitshift(o3, 2)
+    o5 = o3 | o4
+    o6 = bitshift(o5, 4)
+    o7 = o5 | o6
+    o8 = bitshift(o7, 8)
+    o9 = o7 | o8
+    o10 = bitshift(o9, 16)
+    o11 = o9 | o10
+    res = o11 + 1
     return res

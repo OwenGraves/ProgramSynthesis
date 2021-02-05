@@ -9,7 +9,7 @@ class Component:
         self.func_arity = func_arity
 
     def __str__(self):
-        return str(self.constraint())
+        return str(self.constraint()).replace('==', '=')
 
     def __lt__(self, other): # orders based on output variable number, somewhat hacky
         def extract_int_value(c):

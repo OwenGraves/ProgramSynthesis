@@ -47,6 +47,9 @@ class Program:
     def create_subtract_component(self):
         return self.create_component(operator.sub)
 
+    def create_divide_component(self):
+        return self.create_component(operator.truediv)
+
     def create_and_component(self):
         return self.create_component(operator.and_)
 
@@ -61,8 +64,17 @@ class Program:
             shift_amount = bv(shift_amount)
         return self.create_component(lambda x: LShR(x, shift_amount), 1)
 
+    def create_bitshiftleft_component(self, shift_amount):
+        return self.create_component(lambda x: shift_amount << x, 1)
+
     def create_ule_component(self):
         return self.create_component(lambda x, y: If(ULE(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)))
+
+    def create_ult_component(self):
+        return self.create_component(lambda x, y: If(ULT(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)))
+
+    def create_bvredor_component(self):
+        return self.create_component(lambda x: ZeroExt(BV_LENGTH - 1, BVRedOr(x)), 1)
 
     def create_negate_component(self):
         return self.create_component(lambda x: -x, 1)
@@ -118,6 +130,15 @@ class Program:
             return False
         l_values = s.model()
         return l_values
+
+    def evaluate(self, inputs):
+        s = Solver()
+        for i in range(len(self.prog_inputs)):
+            s.add(self.prog_inputs[i] == inputs[i])
+        for c in self.components:
+            s.add(c.constraint())
+        s.check()
+        return int(str(s.model()[self.components[-1].output]))
 
     def generate_constraints(self, inputs, output, distinctl=False):
         self.update_values_based_on_components(distinctl)
