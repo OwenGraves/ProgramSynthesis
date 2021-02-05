@@ -44,8 +44,14 @@ class Program:
     def create_add_component(self):
         return self.create_component(operator.add)
 
+    def create_subtract_component(self):
+        return self.create_component(operator.sub)
+
     def create_and_component(self):
         return self.create_component(operator.and_)
+
+    def create_or_component(self):
+        return self.create_component(operator.or_)
 
     def create_xor_component(self):
         return self.create_component(operator.xor)
@@ -54,6 +60,15 @@ class Program:
         if isinstance(shift_amount, int):
             shift_amount = bv(shift_amount)
         return self.create_component(lambda x: LShR(x, shift_amount), 1)
+
+    def create_ule_component(self):
+        return self.create_component(lambda x, y: If(ULE(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)))
+
+    def create_negate_component(self):
+        return self.create_component(lambda x: -x, 1)
+
+    def create_not_component(self):
+        return self.create_component(lambda x: ~x, 1)
 
     def create_increment_component(self):
         return self.create_component(lambda x: x + 1, 1)

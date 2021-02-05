@@ -30,11 +30,17 @@ def timed_synthesis(program: Program, oracle, timeout=10000000, print_debug=Fals
 def equal_components(num_prog_inputs, num_each_component):
     p = Program(num_prog_inputs=num_prog_inputs)
     for _ in range(num_each_component):
-        p.create_increment_component()
-        p.create_decrement_component()
-        p.create_add_component()
+        # p.create_increment_component()
+        # p.create_decrement_component()
+        # p.create_add_component()
+        # p.create_subtract_component()
         p.create_and_component()
+        # p.create_or_component()
         p.create_xor_component()
+        # p.create_negate_component()
+        # p.create_not_component()
+        # p.create_bitshiftright_component(31)
+        p.create_ule_component()
     return p
 
 # P15 program
@@ -46,4 +52,4 @@ def equal_components(num_prog_inputs, num_each_component):
 # p.create_add_component()
 # p.create_add_component()
 
-timed_synthesis(equal_components(1, 2), BVT.P1, 10000, True)
+timed_synthesis(equal_components(2, 1), BVT.P10, 10000, False)
