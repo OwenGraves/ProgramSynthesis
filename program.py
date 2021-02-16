@@ -88,7 +88,7 @@ class Program:
     def create_decrement_component(self):
         return self.create_component(lambda x: x - 1, 1)
 
-    def distinct_constraint(self, list_inputs_outputs):
+    def distinct_constraint(self, list_inputs_outputs, num_lines_to_ignore_at_end=0):
         self.reset_dinput_variables()
         dist_input = [self.fresh_dinput_variable() for _ in range(len(self.prog_inputs))]
         dist_output = BitVec('doutput1', BV_LENGTH)
@@ -96,11 +96,11 @@ class Program:
 
         constraints = []
         constraints.append(dist_output != dist_output2)
-        constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)])
+        constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
 
         name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
-        constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], distinctl=True)
+        constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], True)
         return constraints
 
     def get_distinct_inputs(self, values):
@@ -110,13 +110,13 @@ class Program:
             dinputs.append(int(str(values[dinput])))
         return dinputs
 
-    def behave_constraints(self, list_inputs_outputs, distinctl=False):
+    def behave_constraints(self, list_inputs_outputs, distinctl=False, num_lines_to_ignore_at_end=0):
         constraints = []
         self.update_values_based_on_components()
         for j, (inputs, output) in enumerate(list_inputs_outputs):
             name = f'{self.prog_name}{j}_'
             p = Program(name, self.I_size, self.components)
-            constraints += p.generate_constraints(inputs, output, distinctl)
+            constraints += p.generate_constraints(inputs, output, distinctl, num_lines_to_ignore_at_end)
         return constraints
 
     def solve_constraints(self, constraints, timeout=10000000):
@@ -140,7 +140,7 @@ class Program:
         s.check()
         return int(str(s.model()[self.components[-1].output]))
 
-    def generate_constraints(self, inputs, output, distinctl=False):
+    def generate_constraints(self, inputs, output, distinctl=False, num_lines_to_ignore_at_end=0):
         self.update_values_based_on_components(distinctl)
 
         # syntactic well-formedness constraints
@@ -167,7 +167,7 @@ class Program:
         psi_conn = []
         for i, input in enumerate(self.prog_inputs):
             self.L[input] = i
-        self.L[self.prog_output] = self.M - 1
+        self.L[self.prog_output] = self.M - 1 - num_lines_to_ignore_at_end
         for x, y in itertools.combinations(self.P + self.R + self.prog_inputs + [self.prog_output], 2):
             psi_conn.append(Implies(self.L[x] == self.L[y], x == y))
 
@@ -192,11 +192,12 @@ class Program:
         p.components.sort()
         return p
 
-    def cull_unused_components(self):
+    def cull_unused_components(self, num_lines_to_ignore_at_end=0):
         if len(self.components) == 0:
             return
 
         # delete unused components
+        del self.components[len(self.components) - num_lines_to_ignore_at_end:]
         i = len(self.components) - 1
         used_o_vars = set()
         used_o_vars.add(self.components[i].output)

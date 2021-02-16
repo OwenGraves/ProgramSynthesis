@@ -8,14 +8,17 @@ def iterative_synthesis(program: Program, oracle, timeout=10000000, print_debug=
     a0 = [0] * len(program.prog_inputs)
     E = [(a0, oracle(*a0))]
     while True:
-        L = program.solve_constraints(program.behave_constraints(E))
-        if print_debug and L:
-            print(program.l_values_to_prog(L).cull_unused_components())
-        if not L:
-            return 'Components insufficient'
-        a = program.solve_constraints(program.distinct_constraint(E), timeout)
+        for i in range(0, len(program.components))[::-1]: # search smallest programs first
+            L = program.solve_constraints(program.behave_constraints(E, num_lines_to_ignore_at_end=i))
+            if print_debug and L:
+                print(program.l_values_to_prog(L).cull_unused_components(i))
+            if not L and i == 0:
+                return 'Components insufficient'
+            elif L:
+                break
+        a = program.solve_constraints(program.distinct_constraint(E, num_lines_to_ignore_at_end=i), timeout)
         if not a:
-            p = program.l_values_to_prog(L).cull_unused_components()
+            p = program.l_values_to_prog(L).cull_unused_components(i)
             # "validation oracle" - only checks small values for time efficiency
             for test_input in product(range(2 ** 4), repeat=len(program.prog_inputs)):
                 if p.evaluate(test_input) != oracle(*test_input):
