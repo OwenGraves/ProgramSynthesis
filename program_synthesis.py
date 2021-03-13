@@ -4,56 +4,84 @@ from program import Program
 from itertools import product
 from timeit import default_timer as timer
 
-def iterative_synthesis(program: Program, oracle, timeout=10000000, print_debug=False):
-    a0 = [0] * len(program.prog_inputs)
-    E = [(a0, oracle(*a0))]
-    while True:
-        for i in range(0, len(program.components))[::-1]: # search smallest programs first
-            L = program.solve_constraints(program.behave_constraints(E, num_lines_to_ignore_at_end=i))
-            if print_debug and L:
-                print(program.l_values_to_prog(L).cull_unused_components(i))
-            if not L and i == 0:
-                return 'Components insufficient'
-            elif L:
+class ProgramSynthesis:
+    def __init__(self, program: Program, oracle, timeout=10000000, print_debug=False, find_shortest_program=True):
+        self.program = program
+        self.oracle = oracle
+        self.timeout = timeout
+        self.print_debug = print_debug
+        self.find_shortest_program = find_shortest_program
+        self.validation_check = False
+
+    def solve_constraints(self, E):
+        def solve_constraints_inner(i):
+            L = self.program.solve_constraints(self.program.behave_constraints(E, num_lines_to_ignore_at_end=i))
+            if self.print_debug and L:
+                print(self.program.l_values_to_prog(L).cull_unused_components(i))
+            return L
+
+        for i in range(0, len(self.program.components))[::-1]: # search smallest programs first
+            if not self.find_shortest_program:
+                i = 0
+            L = solve_constraints_inner(i)
+            if L:
                 break
-        a = program.solve_constraints(program.distinct_constraint(E, num_lines_to_ignore_at_end=i), timeout)
-        if not a:
-            p = program.l_values_to_prog(L).cull_unused_components(i)
-            # "validation oracle" - only checks small values for time efficiency
-            for test_input in product(range(2 ** 4), repeat=len(program.prog_inputs)):
-                if p.evaluate(test_input) != oracle(*test_input):
+            elif i == 0:
+                return None
+        return L, i
+
+    def distinct_constraint(self, E, i):
+        return self.program.solve_constraints(self.program.distinct_constraint(E, num_lines_to_ignore_at_end=i), self.timeout)
+
+    def validate(self, L, i):
+        p = self.program.l_values_to_prog(L).cull_unused_components(i)
+        # "validation oracle" - only checks small values for time efficiency
+        if self.validation_check:
+            for test_input in product(range(2 ** 4), repeat=len(self.program.prog_inputs)):
+                if p.evaluate(test_input) != self.oracle(*test_input):
                     return 'Components insufficient'
-            return p
-        a = program.get_distinct_inputs(a)
-        E.append((a, oracle(*a)))
-        if print_debug:
-            print(E)
+        return p
 
-def timed_synthesis(program: Program, oracle, timeout=10000000, print_debug=False):
-    start = timer()
-    p = iterative_synthesis(program, oracle, timeout, print_debug)
-    if not isinstance(p, str) and print_debug:
-        print('Found:')
-    print(p)
-    end = timer()
-    print('Time taken:', end - start)
-    return p
+    def iterative_synthesis(self):
+        a0 = [0] * len(self.program.prog_inputs)
+        E = [(a0, self.oracle(*a0))]
+        while True:
+            L, i = self.solve_constraints(E)
+            if not L:
+                return 'Components insufficient'
+            a = self.distinct_constraint(E, i)
+            if not a:
+                return self.validate(L, i)
+            a = self.program.get_distinct_inputs(a)
+            E.append((a, self.oracle(*a)))
+            if self.print_debug:
+                print(E)
 
-def equal_components(num_prog_inputs, num_each_component):
-    p = Program(num_prog_inputs=num_prog_inputs)
-    for _ in range(num_each_component):
-        p.create_increment_component()
-        # p.create_decrement_component()
-        # p.create_add_component()
-        # p.create_subtract_component()
-        # p.create_divide_component()
-        p.create_and_component()
-        p.create_or_component()
-        # p.create_xor_component()
-        # p.create_negate_component()
-        p.create_not_component()
-        # p.create_bitshiftright_component(1)
-        # p.create_bitshiftleft_component(-1)
-        # p.create_ule_component()
-        # p.create_ult_component()
-    return p
+    def timed_synthesis(self):
+        start = timer()
+        p = self.iterative_synthesis()
+        if not isinstance(p, str) and self.print_debug:
+            print('Found:')
+        print(p)
+        end = timer()
+        print('Time taken:', end - start)
+        return p
+
+    def equal_components(self, num_prog_inputs, num_each_component):
+        p = Program(num_prog_inputs=num_prog_inputs)
+        for _ in range(num_each_component):
+            p.create_increment_component()
+            # p.create_decrement_component()
+            # p.create_add_component()
+            # p.create_subtract_component()
+            # p.create_divide_component()
+            p.create_and_component()
+            p.create_or_component()
+            # p.create_xor_component()
+            # p.create_negate_component()
+            p.create_not_component()
+            # p.create_bitshiftright_component(1)
+            # p.create_bitshiftleft_component(-1)
+            # p.create_ule_component()
+            # p.create_ult_component()
+        return p
