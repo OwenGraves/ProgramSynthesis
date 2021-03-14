@@ -5,15 +5,27 @@ from itertools import product
 from timeit import default_timer as timer
 
 class ProgramSynthesis:
-    def __init__(self, program: Program, oracle, timeout=10000000, print_debug=False, find_shortest_program=True):
+    def __init__(self, program: Program, oracle, timeout=10000000, print_debug=False):
         self.program = program
         self.oracle = oracle
         self.timeout = timeout
         self.print_debug = print_debug
-        self.find_shortest_program = find_shortest_program
+        self.find_shortest_program = True
         self.validation_check = False
 
+    def reset_timings(self):
+        self.timing_start = timer()
+        self.timing_enter_solve_constraints = []
+        self.timing_enter_distinct_constraint = []
+        self.timing_exit_solve_constraints = []
+        self.timing_exit_distinct_constraint = []
+        self.timing_end = []
+
+    def add_timing(self, var):
+        var.append(round(timer() - self.timing_start, 3))
+
     def solve_constraints(self, E):
+        self.add_timing(self.timing_enter_solve_constraints)
         def solve_constraints_inner(i):
             L = self.program.solve_constraints(self.program.behave_constraints(E, num_lines_to_ignore_at_end=i))
             if self.print_debug and L:
@@ -28,10 +40,15 @@ class ProgramSynthesis:
                 break
             elif i == 0:
                 return None
+        self.add_timing(self.timing_exit_solve_constraints)
         return L, i
 
     def distinct_constraint(self, E, i):
-        return self.program.solve_constraints(self.program.distinct_constraint(E, num_lines_to_ignore_at_end=i), self.timeout)
+        self.add_timing(self.timing_enter_distinct_constraint)
+        dist_const = self.program.distinct_constraint(E, num_lines_to_ignore_at_end=i)
+        solve_const = self.program.solve_constraints(dist_const, self.timeout)
+        self.add_timing(self.timing_exit_distinct_constraint)
+        return solve_const
 
     def validate(self, L, i):
         p = self.program.l_values_to_prog(L).cull_unused_components(i)
@@ -40,9 +57,11 @@ class ProgramSynthesis:
             for test_input in product(range(2 ** 4), repeat=len(self.program.prog_inputs)):
                 if p.evaluate(test_input) != self.oracle(*test_input):
                     return 'Components insufficient'
+        self.add_timing(self.timing_end)
         return p
 
     def iterative_synthesis(self):
+        self.reset_timings()
         a0 = [0] * len(self.program.prog_inputs)
         E = [(a0, self.oracle(*a0))]
         while True:

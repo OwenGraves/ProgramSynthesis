@@ -2,11 +2,12 @@ from z3 import *
 import re
 
 class Component:
-    def __init__(self, inputs, output, func, func_arity):
+    def __init__(self, inputs, output, func, func_arity, name):
         self.inputs = inputs
         self.output = output
         self.func = func
         self.func_arity = func_arity
+        self.name = name
 
     def __str__(self):
         return str(self.constraint()).replace('==', '=')
