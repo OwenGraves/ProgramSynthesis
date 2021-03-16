@@ -5,7 +5,6 @@ from component import Component
 from bit_vector_tests import bv
 import itertools
 import operator
-import pprint
 
 class Program:
     def __init__(self, prog_name='', num_prog_inputs=1, components=[]):
@@ -38,7 +37,7 @@ class Program:
 
     def pp_components(self):
         counter = Counter([c.name for c in self.components])
-        return pprint.pformat(dict(counter))
+        return ', '.join([f'{key}: {val}' for key, val in sorted(counter.items())])
 
     def create_component(self, func, name, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
