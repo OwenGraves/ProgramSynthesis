@@ -60,7 +60,7 @@ def graph_increment():
     plt.show()
     # plt.savefig('figures/increment.png')
 
-def graph_data(pss: typing.Union[ProgramSynthesis, typing.List[ProgramSynthesis]], name, find_shortest=True):
+def graph_data(pss: typing.Union[ProgramSynthesis, typing.List[ProgramSynthesis]], name, print_debug=None, find_shortest=None):
     if isinstance(pss, ProgramSynthesis):
         pss = [pss]
 
@@ -68,9 +68,11 @@ def graph_data(pss: typing.Union[ProgramSynthesis, typing.List[ProgramSynthesis]
     colors = itertools.cycle(['#66c2a5','#fc8d62','#8da0cb','#e78ac3','#a6d854','#ffd92f'])
 
     for ps in pss:
+        if print_debug is not None:
+            ps.print_debug = print_debug
+        if find_shortest is not None:
+            ps.find_shortest_program = find_shortest
         color = next(colors)
-        ps.find_shortest_program = find_shortest
-        ps.print_debug = True
         ps.iterative_synthesis()
         x = list(map(str, range(1, len(ps.timing_exit_distinct_constraint) + 1)))
         y = ps.timing_exit_solve_constraints
@@ -118,7 +120,79 @@ def bench_P16_2():
     p.create_ule_component()
     return ProgramSynthesis(p, BVT.P16, 'P16_2')
 
+def bench_P6():
+    p = Program()
+    p.create_increment_component()
+    p.create_and_component()
+    p.create_or_component()
+    p.create_not_component()
+    p.create_add_component()
+    p.create_xor_component()
+    return ProgramSynthesis(p, BVT.P6, 'P6')
+
+def bench_P7():
+    p = Program()
+    p.create_increment_component()
+    p.create_and_component()
+    p.create_or_component()
+    p.create_not_component()
+    p.create_add_component()
+    p.create_xor_component()
+    return ProgramSynthesis(p, BVT.P7, 'P7')
+
+def bench_P8_divide():
+    p = Program()
+    p.create_decrement_component()
+    p.create_not_component()
+    p.create_and_component()
+    p.create_divide_component()
+    p.create_divide_component()
+    p.create_divide_component()
+    return ProgramSynthesis(p, BVT.P8, 'P8 Divide')
+
+def bench_P8_increment():
+    p = Program()
+    p.create_decrement_component()
+    p.create_not_component()
+    p.create_and_component()
+    p.create_increment_component()
+    p.create_increment_component()
+    p.create_increment_component()
+    return ProgramSynthesis(p, BVT.P8, 'P8 Increment')
+
+def bench_P8_xor():
+    p = Program()
+    p.create_decrement_component()
+    p.create_not_component()
+    p.create_and_component()
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_xor_component()
+    return ProgramSynthesis(p, BVT.P8, 'P8 Xor')
+
+def bench_P8_decrement():
+    p = Program()
+    p.create_decrement_component()
+    p.create_not_component()
+    p.create_and_component()
+    p.create_decrement_component()
+    p.create_decrement_component()
+    p.create_decrement_component()
+    return ProgramSynthesis(p, BVT.P8, 'P8 Dec')
+
+def bench_P8_bitshiftleft1():
+    p = Program()
+    p.create_decrement_component()
+    p.create_not_component()
+    p.create_and_component()
+    p.create_bitshiftleft_component(1)
+    p.create_bitshiftleft_component(1)
+    p.create_bitshiftleft_component(1)
+    return ProgramSynthesis(p, BVT.P8, 'P8 BitShiftL1')
+
 if __name__ == '__main__':
     # graph_increment()
-    # graph_data([bench_P15(), bench_P16(), bench_P16_2()], 'P16_Test_2')
+    # graph_data([bench_P16(), bench_P16(), bench_P16_2()], 'P16_Test', print_debug=True)
+    # graph_data([bench_P6(), bench_P7()], 'P6_7 Same Components')
+    # graph_data([bench_P8_divide(), bench_P8_increment(), bench_P8_xor(), bench_P8_decrement(), bench_P8_bitshiftleft1()], 'P Cost Differences')
     print('done')
