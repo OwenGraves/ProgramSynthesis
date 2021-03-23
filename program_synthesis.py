@@ -5,7 +5,8 @@ from itertools import product
 from timeit import default_timer as timer
 
 class ProgramSynthesis:
-    def __init__(self, program: Program, oracle, timeout=10000000, print_debug=False):
+    def __init__(self, program: Program, oracle, name, timeout=10000000, print_debug=False):
+        self.name = name
         self.program = program
         self.oracle = oracle
         self.timeout = timeout
