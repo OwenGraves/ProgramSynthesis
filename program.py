@@ -6,6 +6,8 @@ from bit_vector_tests import bv
 import itertools
 import operator
 
+from solver import solver
+
 class Program:
     def __init__(self, prog_name='', num_prog_inputs=1, components=[]):
         self.prog_name = prog_name
@@ -102,7 +104,7 @@ class Program:
         constraints.append(dist_output != dist_output2)
         constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
 
-        name = f'{self.prog_name}d_'
+        name = f'p{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
         constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], True)
         return constraints
@@ -118,13 +120,13 @@ class Program:
         constraints = []
         self.update_values_based_on_components()
         for j, (inputs, output) in enumerate(list_inputs_outputs):
-            name = f'{self.prog_name}{j}_'
+            name = f'p{self.prog_name}{j}_'
             p = Program(name, self.I_size, self.components)
             constraints += p.generate_constraints(inputs, output, distinctl, num_lines_to_ignore_at_end)
         return constraints
 
     def solve_constraints(self, constraints, timeout=10000000):
-        s = Solver()
+        s = solver.Solver()
         s.set('timeout', timeout)
         s.add(constraints)
         check = s.check()
