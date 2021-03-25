@@ -2,7 +2,7 @@ import subprocess
 import os
 
 import z3
-import solver.solver_utils as sutils
+import solver_process.solver_utils as sutils
 
 
 CURRENT = os.path.dirname(os.path.realpath(__file__))
@@ -39,7 +39,7 @@ class ModelProxy(object):
 
 class Solver(object):
     def __init__(self):
-        self._proc = subprocess.Popen(['python3', Z3_SERVER_FILE],
+        self._proc = subprocess.Popen(['python', Z3_SERVER_FILE],
                 stdout=subprocess.PIPE,
                 stdin=subprocess.PIPE,
                 # stderr=subprocess.PIPE,

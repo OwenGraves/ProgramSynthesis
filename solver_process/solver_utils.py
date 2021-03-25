@@ -1,6 +1,5 @@
 import math
 import json
-import sys
 
 LEN_LEN = 8
 

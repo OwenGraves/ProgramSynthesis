@@ -116,9 +116,18 @@ def bench_P16_2():
     p.create_xor_component()
     p.create_xor_component()
     p.create_negate_component()
-    p.create_and_component()
     p.create_ule_component()
+    p.create_and_component()
     return ProgramSynthesis(p, BVT.P16, 'P16_2')
+
+def bench_P16_3():
+    p = Program(num_prog_inputs=2)
+    p.create_and_component()
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_negate_component()
+    p.create_ule_component()
+    return ProgramSynthesis(p, BVT.P16, 'P16_3')
 
 def bench_P6():
     p = Program()
@@ -192,7 +201,7 @@ def bench_P8_bitshiftleft1():
 
 if __name__ == '__main__':
     # graph_increment()
-    # graph_data([bench_P16(), bench_P16(), bench_P16_2()], 'P16_Test', print_debug=True)
+    graph_data([bench_P16(), bench_P16_2(), bench_P16_3(), bench_P16(), bench_P16_2(), bench_P16_3()], 'Test_Same8')
     # graph_data([bench_P6(), bench_P7()], 'P6_7 Same Components')
     # graph_data([bench_P8_divide(), bench_P8_increment(), bench_P8_xor(), bench_P8_decrement(), bench_P8_bitshiftleft1()], 'P Cost Differences')
     print('done')

@@ -11,7 +11,7 @@ def test_simple():
     p.create_increment_component()
     p.create_increment_component()
     print('Increment:')
-    ProgramSynthesis(p, BVT.Psimple).timed_synthesis()
+    ProgramSynthesis(p, BVT.Psimple, 'Simple').timed_synthesis()
 
 def test_P6():
     print('P6 program, turn on rightmost 0-bit:')
@@ -28,7 +28,7 @@ def test_P15():
     p.create_and_component()
     p.create_xor_component()
     p.create_bitshiftright_component(1)
-    ProgramSynthesis(p, BVT.P15, 100000).timed_synthesis()
+    ProgramSynthesis(p, BVT.P15, 'P15', 10000, print_debug=True).timed_synthesis()
 
 def test_P16():
     print('P16 program, find max:')

@@ -1,12 +1,12 @@
 from z3 import *
-from constants import BV_LENGTH
+from constants import BV_LENGTH, USE_SOLVER_PROCESS
 from collections import Counter
 from component import Component
 from bit_vector_tests import bv
 import itertools
 import operator
 
-from solver import solver
+from solver_process import solver
 
 class Program:
     def __init__(self, prog_name='', num_prog_inputs=1, components=[]):
@@ -126,7 +126,10 @@ class Program:
         return constraints
 
     def solve_constraints(self, constraints, timeout=10000000):
-        s = solver.Solver()
+        if USE_SOLVER_PROCESS:
+            s = solver.Solver()
+        else:
+            s = Solver()
         s.set('timeout', timeout)
         s.add(constraints)
         check = s.check()
