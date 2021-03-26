@@ -15,7 +15,7 @@ p.create_add_component()
 p.create_and_component()
 p.create_xor_component()
 p.create_bitshiftright_component(1)
-iterative_synthesis(p, lambda x, y: (x + y) // 2)
+ProgramSynthesis(p, lambda x, y: (x + y) // 2, 'Find Average').iterative_synthesis()
 ```
 automatically produces
 ```
@@ -33,7 +33,7 @@ p.create_add_component()
 p.create_and_component()
 p.create_or_component()
 p.create_not_component()
-iterative_synthesis(p, reference_implementation)
+ProgramSynthesis(p, reference_implementation, 'Turn on rightmost bit').iterative_synthesis()
 ```
 finds
 ```
