@@ -57,7 +57,7 @@ class ProgramSynthesis:
         if self.validation_check:
             for test_input in product(range(2 ** 4), repeat=len(self.program.prog_inputs)):
                 if p.evaluate(test_input) != self.oracle(*test_input):
-                    return 'Components insufficient'
+                    return 'Components insufficient in validation'
         self.add_timing(self.timing_end)
         return p
 
@@ -85,23 +85,4 @@ class ProgramSynthesis:
         print(p)
         end = timer()
         print('Time taken:', end - start)
-        return p
-
-    def equal_components(self, num_prog_inputs, num_each_component):
-        p = Program(num_prog_inputs=num_prog_inputs)
-        for _ in range(num_each_component):
-            p.create_increment_component()
-            # p.create_decrement_component()
-            # p.create_add_component()
-            # p.create_subtract_component()
-            # p.create_divide_component()
-            p.create_and_component()
-            p.create_or_component()
-            # p.create_xor_component()
-            # p.create_negate_component()
-            p.create_not_component()
-            # p.create_bitshiftright_component(1)
-            # p.create_bitshiftleft_component(-1)
-            # p.create_ule_component()
-            # p.create_ult_component()
         return p
