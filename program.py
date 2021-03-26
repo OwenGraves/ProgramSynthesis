@@ -1,10 +1,12 @@
 from z3 import *
-from constants import BV_LENGTH
+from constants import BV_LENGTH, USE_SOLVER_PROCESS
 from collections import Counter
 from component import Component
 from bit_vector_tests import bv
 import itertools
 import operator
+
+from solver_process import solver
 
 class Program:
     def __init__(self, prog_name='', num_prog_inputs=1, components=[]):
@@ -14,7 +16,7 @@ class Program:
         self.prog_output = self.fresh_O_variable()
         self.components: list[Component] = []
         for c in components:
-            self.create_component(c.func, c.func_arity)
+            self.create_component(c.func, c.name, c.func_arity)
         self.update_values_based_on_components()
 
     def update_values_based_on_components(self, distinctl=False):
@@ -35,58 +37,62 @@ class Program:
     def __str__(self):
         return '\n'.join(str(c) for c in self.components)
 
-    def create_component(self, func, func_arity=2):
+    def pp_components(self):
+        counter = Counter([c.name for c in self.components])
+        return ', '.join([f'{key}: {val}' for key, val in sorted(counter.items())])
+
+    def create_component(self, func, name, func_arity=2):
         input_vars = [self.fresh_i_variable() for _ in range(func_arity)]
-        c = Component(input_vars, self.fresh_o_variable(), func, func_arity)
+        c = Component(input_vars, self.fresh_o_variable(), func, func_arity, name)
         self.components.append(c)
         return c
 
     def create_add_component(self):
-        return self.create_component(operator.add)
+        return self.create_component(operator.add, 'Add')
 
     def create_subtract_component(self):
-        return self.create_component(operator.sub)
+        return self.create_component(operator.sub, 'Sub')
 
     def create_divide_component(self):
-        return self.create_component(operator.truediv)
+        return self.create_component(operator.truediv, 'Div')
 
     def create_and_component(self):
-        return self.create_component(operator.and_)
+        return self.create_component(operator.and_, 'And')
 
     def create_or_component(self):
-        return self.create_component(operator.or_)
+        return self.create_component(operator.or_, 'Or')
 
     def create_xor_component(self):
-        return self.create_component(operator.xor)
+        return self.create_component(operator.xor, 'Xor')
 
     def create_bitshiftright_component(self, shift_amount):
         if isinstance(shift_amount, int):
             shift_amount = bv(shift_amount)
-        return self.create_component(lambda x: LShR(x, shift_amount), 1)
+        return self.create_component(lambda x: LShR(x, shift_amount), f'RShift({shift_amount})', 1)
 
     def create_bitshiftleft_component(self, shift_amount):
-        return self.create_component(lambda x: shift_amount << x, 1)
+        return self.create_component(lambda x: shift_amount << x, f'LShift({shift_amount})', 1)
 
     def create_ule_component(self):
-        return self.create_component(lambda x, y: If(ULE(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)))
+        return self.create_component(lambda x, y: If(ULE(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)), 'Ule')
 
     def create_ult_component(self):
-        return self.create_component(lambda x, y: If(ULT(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)))
+        return self.create_component(lambda x, y: If(ULT(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)), 'Ult')
 
     def create_bvredor_component(self):
-        return self.create_component(lambda x: ZeroExt(BV_LENGTH - 1, BVRedOr(x)), 1)
+        return self.create_component(lambda x: ZeroExt(BV_LENGTH - 1, BVRedOr(x)), 'Bvredor', 1)
 
     def create_negate_component(self):
-        return self.create_component(lambda x: -x, 1)
+        return self.create_component(lambda x: -x, 'Negate', 1)
 
     def create_not_component(self):
-        return self.create_component(lambda x: ~x, 1)
+        return self.create_component(lambda x: ~x, 'Not', 1)
 
     def create_increment_component(self):
-        return self.create_component(lambda x: x + 1, 1)
+        return self.create_component(lambda x: x + 1, 'Increment', 1)
 
     def create_decrement_component(self):
-        return self.create_component(lambda x: x - 1, 1)
+        return self.create_component(lambda x: x - 1, 'Decrement', 1)
 
     def distinct_constraint(self, list_inputs_outputs, num_lines_to_ignore_at_end=0):
         self.reset_dinput_variables()
@@ -98,7 +104,7 @@ class Program:
         constraints.append(dist_output != dist_output2)
         constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
 
-        name = f'{self.prog_name}d_'
+        name = f'p{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
         constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], True)
         return constraints
@@ -114,13 +120,16 @@ class Program:
         constraints = []
         self.update_values_based_on_components()
         for j, (inputs, output) in enumerate(list_inputs_outputs):
-            name = f'{self.prog_name}{j}_'
+            name = f'p{self.prog_name}{j}_'
             p = Program(name, self.I_size, self.components)
             constraints += p.generate_constraints(inputs, output, distinctl, num_lines_to_ignore_at_end)
         return constraints
 
     def solve_constraints(self, constraints, timeout=10000000):
-        s = Solver()
+        if USE_SOLVER_PROCESS:
+            s = solver.Solver()
+        else:
+            s = Solver()
         s.set('timeout', timeout)
         s.add(constraints)
         check = s.check()
