@@ -25,9 +25,29 @@ def ult(x, y):
 def bvredor(x):
     return simplify(BVRedOr(bv(x))).as_long()
 
-def Psimple(x):
+def Psimple_inc(x):
     """Increment."""
     res = x + 1
+    return res
+
+def Psimple_dec(x):
+    """Decrement."""
+    res = x - 1
+    return res
+
+def Psimple_and(x, y):
+    """And."""
+    res = x & y
+    return res
+
+def Psimple_or(x, y):
+    """Or."""
+    res = x | y
+    return res
+
+def Psimple_xor(x, y):
+    """Xor."""
+    res = x ^ y
     return res
 
 def P1(x):

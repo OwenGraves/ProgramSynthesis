@@ -125,7 +125,7 @@ class Program:
             constraints += p.generate_constraints(inputs, output, distinctl, num_lines_to_ignore_at_end)
         return constraints
 
-    def solve_constraints(self, constraints, timeout=10000000):
+    def solve_constraints(self, constraints, name, timeout=10000000):
         if USE_SOLVER_PROCESS:
             s = solver.Solver()
         else:
@@ -135,7 +135,7 @@ class Program:
         check = s.check()
         if check != sat:
             if check == unknown:
-                print(f'Timed out after {timeout/1000} seconds.')
+                print(f'{name} timed out after {timeout/1000} seconds.')
             return False
         l_values = s.model()
         return l_values

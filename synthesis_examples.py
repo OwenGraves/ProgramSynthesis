@@ -11,7 +11,7 @@ def test_simple():
     p.create_increment_component()
     p.create_increment_component()
     print('Simple increment program:')
-    ProgramSynthesis(p, BVT.Psimple, 'Simple').timed_synthesis()
+    ProgramSynthesis(p, BVT.Psimple_inc, 'Simple').timed_synthesis()
 
 def test_P6():
     print('P6 program, turn on rightmost 0-bit:')

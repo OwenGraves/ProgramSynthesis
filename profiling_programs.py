@@ -90,3 +90,59 @@ def P8_bitshiftleft1():
     p.create_bitshiftleft_component(1)
     p.create_bitshiftleft_component(1)
     return ProgramSynthesis(p, BVT.P8, 'P8 BitShiftL1')
+
+def first8_program():
+    p = Program()
+    p.create_increment_component()
+    p.create_decrement_component()
+    p.create_and_component()
+    # p.create_negate_component()
+    p.create_xor_component()
+    p.create_or_component()
+    p.create_not_component()
+    return p
+
+def P1through8():
+    ps = []
+    for p in [BVT.P1, BVT.P2, BVT.P3, BVT.P4, BVT.P5, BVT.P6, BVT.P7, BVT.P8]:
+        ps.append(ProgramSynthesis(first8_program(), p, p.__name__))
+    return ps
+
+def P1through8except3():
+    ps = []
+    for p in [BVT.P1, BVT.P2, BVT.P4, BVT.P5, BVT.P6, BVT.P7, BVT.P8]:
+        ps.append(ProgramSynthesis(first8_program(), p, p.__name__))
+    return ps
+
+def first8_program_no_xor():
+    p = Program()
+    p.create_increment_component()
+    p.create_decrement_component()
+    p.create_and_component()
+    # p.create_negate_component()
+    # p.create_xor_component()
+    p.create_or_component()
+    p.create_not_component()
+    return p
+
+def P1_2_5_8():
+    ps = []
+    for p in [BVT.P1, BVT.P2, BVT.P5, BVT.P6, BVT.P7, BVT.P8]:
+        ps.append(ProgramSynthesis(first8_program_no_xor(), p, p.__name__))
+    return ps
+
+def inc_dec_and_or_with(comp, number):
+    p = Program()
+    p.create_increment_component()
+    p.create_decrement_component()
+    p.create_and_component()
+    p.create_or_component()
+    for _ in range(number):
+        comp(p)
+    return p
+
+def Pinc_dec_and_or(comp, number):
+    ps = []
+    for p in [BVT.Psimple_inc, BVT.Psimple_dec, BVT.P1, BVT.P2, BVT.P5, BVT.P6]:
+        ps.append(ProgramSynthesis(inc_dec_and_or_with(comp, number), p, p.__name__))
+    return ps

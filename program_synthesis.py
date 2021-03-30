@@ -28,7 +28,7 @@ class ProgramSynthesis:
     def solve_constraints(self, E):
         self.add_timing(self.timing_enter_solve_constraints)
         def solve_constraints_inner(i):
-            L = self.program.solve_constraints(self.program.behave_constraints(E, num_lines_to_ignore_at_end=i))
+            L = self.program.solve_constraints(self.program.behave_constraints(E, num_lines_to_ignore_at_end=i), self.name)
             if self.print_debug and L:
                 print(self.program.l_values_to_prog(L).cull_unused_components(i))
             return L
@@ -47,7 +47,7 @@ class ProgramSynthesis:
     def distinct_constraint(self, E, i):
         self.add_timing(self.timing_enter_distinct_constraint)
         dist_const = self.program.distinct_constraint(E, num_lines_to_ignore_at_end=i)
-        solve_const = self.program.solve_constraints(dist_const, self.timeout)
+        solve_const = self.program.solve_constraints(dist_const, self.name, self.timeout)
         self.add_timing(self.timing_exit_distinct_constraint)
         return solve_const
 
