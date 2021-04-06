@@ -146,3 +146,55 @@ def Pinc_dec_and_or(comp, number):
     for p in [BVT.Psimple_inc, BVT.Psimple_dec, BVT.P1, BVT.P2, BVT.P5, BVT.P6]:
         ps.append(ProgramSynthesis(inc_dec_and_or_with(comp, number), p, p.__name__))
     return ps
+
+def shortestComparison_P1():
+    ps = []
+    p = Program()
+    p.create_decrement_component()
+    p.create_and_component()
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_decrement_component()
+    oracle = BVT.P1
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps
+
+def shortestComparison_P14():
+    ps = []
+    p = Program(num_prog_inputs=2)
+    p.create_bitshiftleft_component(-1)
+    p.create_increment_component()
+    p.create_subtract_component()
+    p.create_and_component()
+    p.create_divide_component()
+    oracle = BVT.P14
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps
+
+def shortestComparison_P16():
+    ps = []
+    p = Program(num_prog_inputs=2)
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_and_component()
+    p.create_negate_component()
+    p.create_ule_component()
+    p.create_and_component()
+    oracle = BVT.P16
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps

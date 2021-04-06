@@ -56,6 +56,12 @@ if __name__ == '__main__':
     # graph_data(P1_2_5_8(), 'P1,2,5-8 no negate, no xor, find shortest', find_shortest=True, print_debug=True, print_components=1)
     # graph_data(P1_2_5_8(), 'P1,2,5-8 no negate, no xor, no find shortest', find_shortest=False, print_debug=True, print_components=1)
     comp_list = [(Program.create_increment_component, 'Increment'), (Program.create_add_component, 'Add'), (Program.create_and_component, 'And'), (Program.create_xor_component, 'Xor'), (Program.create_not_component, 'Not'), (Program.create_divide_component, 'Divide')]
-    for i in range(1, 4):
-        graph_several([(Pinc_dec_and_or(comp, i), name) for comp, name in comp_list], f'IncDecAndOr{i}/', print_debug=True, print_components=1)
+    # for i in range(1, 4):
+    #     graph_several([(Pinc_dec_and_or(comp, i), name) for comp, name in comp_list], f'IncDecAndOr{i}/', print_debug=True, print_components=1)
+    # graph_data(shortestComparison_P1(), 'ShortestComparisons/P1_0', print_debug=True)
+    graph_data(shortestComparison_P14(), 'ShortestComparisons/P14_4', print_debug=True)
+    # graph_data(shortestComparison_P16(), 'ShortestComparisons/P16_1', print_debug=True)
+    # v = BVT.P14(BitVecVal(20, BV_LENGTH), BitVecVal(5, BV_LENGTH))
+    # print(v)
+    # print(simplify(v))
     print('done')
