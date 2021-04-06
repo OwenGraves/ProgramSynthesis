@@ -19,7 +19,9 @@ def graph_data(pss: typing.List[ProgramSynthesis], filename, print_debug=None, f
         if find_shortest is not None:
             ps.find_shortest_program = find_shortest
         color, linestyle = next(colors), next(linestyles)
-        ps.iterative_synthesis()
+        p = ps.iterative_synthesis()
+        if isinstance(p, str):
+            print(p)
         xs = list(range(1, len(ps.timing_exit_distinct_constraint) + 1))
         ys = ps.timing_exit_solve_constraints
         y2s = ps.timing_exit_distinct_constraint
@@ -59,9 +61,7 @@ if __name__ == '__main__':
     # for i in range(1, 4):
     #     graph_several([(Pinc_dec_and_or(comp, i), name) for comp, name in comp_list], f'IncDecAndOr{i}/', print_debug=True, print_components=1)
     # graph_data(shortestComparison_P1(), 'ShortestComparisons/P1_0', print_debug=True)
-    graph_data(shortestComparison_P14(), 'ShortestComparisons/P14_4', print_debug=True)
+    # graph_data(shortestComparison_P14(), 'ShortestComparisons/P14_5', print_debug=True)
     # graph_data(shortestComparison_P16(), 'ShortestComparisons/P16_1', print_debug=True)
-    # v = BVT.P14(BitVecVal(20, BV_LENGTH), BitVecVal(5, BV_LENGTH))
-    # print(v)
-    # print(simplify(v))
+    # graph_data(alternative_increment(), 'P1 alternative increment', print_debug=True)
     print('done')

@@ -31,7 +31,7 @@ def test_P15():
     ProgramSynthesis(p, BVT.P15, 'P15', timeout=20000, print_debug=True).timed_synthesis()
 
 def test_P16():
-    print('Find max program (Also P16):')
+    print('Find max program (also P16):')
     p = Program(num_prog_inputs=2)
     p.create_xor_component()
     p.create_xor_component()
@@ -49,6 +49,15 @@ def test_P20():
     p.create_or_component()
     p.create_bitshiftright_component(BV_LENGTH - 1)
     ProgramSynthesis(p, BVT.P20, 'P20', timeout=20000).timed_synthesis()
+
+def test_insufficient():
+    print('PSimple, testing insufficient components')
+    p = Program()
+    p.create_and_component()
+    p.create_bvredor_component()
+    p.create_ule_component()
+    p.create_or_component()
+    ProgramSynthesis(p, BVT.Psimple_dec, 'PSimple_insufficient').timed_synthesis()
 
 def equal_components(num_prog_inputs, num_each_component):
     # Currently too slow to have all components at once
@@ -78,3 +87,4 @@ if __name__ == '__main__':
     test_P15()
     test_P16()
     test_P20()
+    test_insufficient()

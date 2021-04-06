@@ -40,7 +40,7 @@ class ProgramSynthesis:
             if L:
                 break
             elif i == 0:
-                return None
+                return None, None
         self.add_timing(self.timing_exit_solve_constraints)
         return L, i
 
@@ -84,5 +84,5 @@ class ProgramSynthesis:
             print('Found:')
         print(p)
         end = timer()
-        print('Time taken:', end - start)
+        print('Time taken:', format(end - start, '.2f'))
         return p

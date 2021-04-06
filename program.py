@@ -203,7 +203,7 @@ class Program:
 
     def cull_unused_components(self, num_lines_to_ignore_at_end=0):
         if len(self.components) == 0:
-            return
+            return self
 
         # delete unused components
         del self.components[len(self.components) - num_lines_to_ignore_at_end:]
