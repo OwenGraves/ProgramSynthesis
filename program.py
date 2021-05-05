@@ -94,7 +94,7 @@ class Program:
     def create_decrement_component(self):
         return self.create_component(lambda x: x - 1, 'Decrement', 1)
 
-    def distinct_constraint(self, list_inputs_outputs, num_lines_to_ignore_at_end=0):
+    def distinct_constraint(self, list_inputs_outputs, behave_L, num_lines_to_ignore_at_end=0):
         self.reset_dinput_variables()
         dist_input = [self.fresh_dinput_variable() for _ in range(len(self.prog_inputs))]
         dist_output = BitVec('doutput1', BV_LENGTH)
@@ -103,8 +103,10 @@ class Program:
         constraints = []
         constraints.append(dist_output != dist_output2)
         constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
+        for x in behave_L.decls():
+            constraints.append(BitVec(f'{x}', BV_LENGTH) == behave_L[x])
 
-        name = f'p{self.prog_name}d_'
+        name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
         constraints += p.behave_constraints(list_inputs_outputs + [(dist_input, dist_output2)], True)
         return constraints

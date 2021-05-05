@@ -44,9 +44,9 @@ class ProgramSynthesis:
         self.add_timing(self.timing_exit_solve_constraints)
         return L, i
 
-    def distinct_constraint(self, E, i):
+    def distinct_constraint(self, E, i, L):
         self.add_timing(self.timing_enter_distinct_constraint)
-        dist_const = self.program.distinct_constraint(E, num_lines_to_ignore_at_end=i)
+        dist_const = self.program.distinct_constraint(E, L, num_lines_to_ignore_at_end=i)
         solve_const = self.program.solve_constraints(dist_const, self.name, self.timeout)
         self.add_timing(self.timing_exit_distinct_constraint)
         return solve_const
@@ -69,7 +69,7 @@ class ProgramSynthesis:
             L, i = self.solve_constraints(E)
             if not L:
                 return 'Components insufficient'
-            a = self.distinct_constraint(E, i)
+            a = self.distinct_constraint(E, i, L)
             if not a:
                 return self.validate(L, i)
             a = self.program.get_distinct_inputs(a)
