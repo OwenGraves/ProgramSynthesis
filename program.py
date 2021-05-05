@@ -102,9 +102,10 @@ class Program:
 
         constraints = []
         constraints.append(dist_output != dist_output2)
-        constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
+        # Reuse the l-values from the behavioral constraint step
         for x in behave_L.decls():
             constraints.append(BitVec(f'{x}', BV_LENGTH) == behave_L[x])
+        constraints += self.behave_constraints(list_inputs_outputs + [(dist_input, dist_output)], False, num_lines_to_ignore_at_end)
 
         name = f'{self.prog_name}d_'
         p = Program(name, self.I_size, self.components)
