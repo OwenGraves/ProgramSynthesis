@@ -155,6 +155,7 @@ def shortestComparison_P1():
     p.create_xor_component()
     p.create_xor_component()
     p.create_decrement_component()
+    p.create_add_component()
     oracle = BVT.P1
     ps_short = ProgramSynthesis(p, oracle, 'Shortest')
     ps_short.find_shortest_program = True
@@ -172,6 +173,7 @@ def shortestComparison_P14():
     p.create_subtract_component()
     p.create_and_component()
     p.create_divide_component()
+    p.create_xor_component()
     oracle = BVT.P14
     ps_short = ProgramSynthesis(p, oracle, 'Shortest')
     ps_short.find_shortest_program = True
@@ -190,7 +192,44 @@ def shortestComparison_P16():
     p.create_negate_component()
     p.create_ule_component()
     p.create_and_component()
+    p.create_add_component()
     oracle = BVT.P16
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps
+
+def shortestComparison_P20():
+    ps = []
+    p = Program(num_prog_inputs=1)
+    p.create_decrement_component()
+    p.create_bitshiftright_component(BV_LENGTH - 1)
+    p.create_and_component()
+    p.create_bvredor_component()
+    p.create_or_component()
+    oracle = BVT.P20
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps
+
+def shortestComparison_P21():
+    ps = []
+    p = Program(num_prog_inputs=1)
+    p.create_negate_component()
+    p.create_and_component()
+    p.create_add_component()
+    p.create_xor_component()
+    p.create_add_component()
+    p.create_bitshiftright_component(2)
+    p.create_or_component()
+    oracle = BVT.P21
     ps_short = ProgramSynthesis(p, oracle, 'Shortest')
     ps_short.find_shortest_program = True
     ps.append(ps_short)
