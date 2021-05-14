@@ -194,10 +194,10 @@ def shortestComparison_P16():
     p.create_and_component()
     p.create_add_component()
     oracle = BVT.P16
-    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short = ProgramSynthesis(p, oracle, 'Find Shortest')
     ps_short.find_shortest_program = True
     ps.append(ps_short)
-    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Find Shortest')
     ps_no_short.find_shortest_program = False
     ps.append(ps_no_short)
     return ps
