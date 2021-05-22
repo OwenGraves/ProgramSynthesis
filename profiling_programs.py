@@ -210,7 +210,27 @@ def shortestComparison_P20():
     p.create_and_component()
     p.create_bvredor_component()
     p.create_or_component()
+    p.create_and_component()
+    p.create_add_component()
     oracle = BVT.P20
+    ps_short = ProgramSynthesis(p, oracle, 'Shortest')
+    ps_short.find_shortest_program = True
+    ps.append(ps_short)
+    ps_no_short = ProgramSynthesis(p, oracle, 'No Shortest')
+    ps_no_short.find_shortest_program = False
+    ps.append(ps_no_short)
+    return ps
+
+def shortestComparison_P7():
+    ps = []
+    p = Program(num_prog_inputs=1)
+    p.create_not_component()
+    p.create_increment_component()
+    p.create_and_component()
+    p.create_or_component()
+    p.create_decrement_component()
+    p.create_and_component()
+    oracle = BVT.P7
     ps_short = ProgramSynthesis(p, oracle, 'Shortest')
     ps_short.find_shortest_program = True
     ps.append(ps_short)

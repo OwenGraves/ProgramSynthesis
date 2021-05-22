@@ -73,6 +73,9 @@ class Program:
     def create_bitshiftleft_component(self, shift_amount):
         return self.create_component(lambda x: shift_amount << x, f'LShift({shift_amount})', 1)
 
+    def create_constand_component(self, const):
+        return self.create_component(lambda x: x & const, f'And({const})', 1)
+
     def create_ule_component(self):
         return self.create_component(lambda x, y: If(ULE(x, y), BitVecVal(1, BV_LENGTH), BitVecVal(0, BV_LENGTH)), 'Ule')
 

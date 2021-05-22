@@ -1,3 +1,4 @@
+from bit_vector_tests import P20
 import typing
 import itertools
 from constants import BV_LENGTH
@@ -133,6 +134,40 @@ def create_bar_graph():
     pathlib.Path(savefile.parent).mkdir(parents=True, exist_ok=True)
     plt.savefig(savefile)
 
+def isolate_right_0(x):
+    s = bin(x)
+    for i in range(len(s) - 1):
+        if s[len(s) - i - 1] == '0':
+            break
+    return 2 ** i
+
+def count_bits(x):
+    return bin(x).count('1')
+
+def count_bits_test(x):
+    o1 = x + x
+    o2 = o1 & 51
+    o3 = x - o2
+    o4 = o3 & 15
+    o5 = o3 >> 4
+    o6 = o5 + o4
+    o7 = o6 >> 1
+    o8 = o7 & 51
+    return o8
+
+def count_bit_parity(x):
+    return bin(x).count('1') % 2
+
+def count_bit_parity_test(I1):
+    o1 = I1 >> 2
+    o2 = o1 ^ I1
+    o3 = o2 >> 1
+    o4 = o2 ^ o3
+    o5 = o4 >> 4
+    o6 = o5 ^ o4
+    o7 = o6 & 1
+    return o7
+
 if __name__ == '__main__':
     # graph_data(P1through8(), 'P1 - P8', print_components=1)
     # graph_data(P1through8(), 'P1 - P8', find_shortest=False)
@@ -144,8 +179,39 @@ if __name__ == '__main__':
     # create_bar_graph()
     # graph_data(shortestComparison_P1(), 'ShortestComparisons/P1', print_debug=True)
     # graph_data(shortestComparison_P14(), 'ShortestComparisons/P14', print_debug=True)
-    graph_data(shortestComparison_P16(), 'compareP16', print_debug=True)
+    # graph_data(shortestComparison_P16(), 'compareP16', print_debug=True)
     # graph_data(shortestComparison_P20(), 'ShortestComparisons/P20', print_debug=True)
     # graph_data(shortestComparison_P21(), 'ShortestComparisons/P21', print_debug=True)
     # graph_data(alternative_increment(), 'P1 alternative increment', print_debug=True)
+    # graph_data(shortestComparison_P20(), 'shortest', print_debug=True)
+    # graph_data(shortestComparison_P7(), 'shortest', print_debug=True)
+    # for i in range(64):
+    #     print(count_bits(i), count_bits_test(i))
+
+    # p = Program(num_prog_inputs=1)
+    # p.create_bitshiftright_component(1)
+    # p.create_constand_component(0x55555555)
+    # p.create_constand_component(0x55555555)
+    # p.create_bitshiftright_component(2)
+    # p.create_constand_component(0x33333333)
+    # p.create_constand_component(0x33333333)
+    # p.create_add_component()
+    # p.create_add_component()
+    # prog = ProgramSynthesis(p, count_bits, 'count bits', print_debug=True).iterative_synthesis()
+    # print(prog)
+
+    for i in range(64):
+        if count_bit_parity(i) != count_bit_parity_test(i):
+            print(i)
+
+    p = Program(num_prog_inputs=1)
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_xor_component()
+    p.create_constand_component(1)
+    p.create_bitshiftright_component(1)
+    p.create_bitshiftright_component(2)
+    p.create_bitshiftright_component(4)
+    prog = ProgramSynthesis(p, count_bit_parity, 'count bits', print_debug=True).iterative_synthesis()
+    print(prog)
     print('done')
